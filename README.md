@@ -77,13 +77,59 @@ Environment variables for the connector:
 - `OCR_URL`: URL of the OCR service (default: http://paddleocr:8866)
 - `LLM_API`: URL of the LLM API (default: http://ollama:11434)
 
-## Development
+## 🚀 Coolify Deployment
 
-To run locally without Docker:
+This project is ready for one-click deployment on Coolify!
+
+### Quick Deploy
+
+1. **Run the finalizer script:**
+   ```bash
+   ./finalize-for-coolify.sh
+   ```
+
+2. **Import the stack in Coolify:**
+   - Go to your Coolify dashboard
+   - Create a new project or select existing
+   - Choose "Import" → "From YAML"
+   - Upload or paste the contents of `coolify-stack.yml`
+   - Replace `yourdomain.com` with your actual domain
+   - Deploy!
+
+### Services Included
+
+| Service | URL Pattern | Description |
+|---------|-------------|-------------|
+| **FastAPIConnector** | `https://connector.yourdomain.com` | Your OCR→LLM orchestration API |
+| **OpenWebUI** | `https://ai.yourdomain.com` | Web UI for chatting with models |
+| **Ollama** | `https://ollama.yourdomain.com` | Local LLM runtime |
+| **PaddleOCR** | `https://ocr.yourdomain.com` | OCR service for documents |
+
+### Post-Deployment Setup
+
+1. **Load models in Ollama:**
+   ```bash
+   curl https://ollama.yourdomain.com/api/pull -d '{"name": "mistral:7b-instruct-q4_0"}'
+   ```
+
+2. **Test the connector:**
+   ```bash
+   curl -X POST https://connector.yourdomain.com/parse-receipt \
+     -F "file=@receipt.jpg"
+   ```
+
+3. **Access OpenWebUI:**
+   - Visit `https://ai.yourdomain.com`
+   - Models will auto-appear after loading in Ollama
+
+### Manual Build (Alternative)
+
+If you prefer manual setup:
 
 ```bash
-pip install -r requirements.txt
-python connector.py
-```
+# Build locally
+docker build -t fastapi-connector:latest .
 
-For production deployment, build and push the Docker image as described above, then use `docker-compose up`.
+# Test locally
+docker run -p 8000:8000 --env-file .env fastapi-connector:latest
+```
